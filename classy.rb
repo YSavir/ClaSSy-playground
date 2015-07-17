@@ -1,15 +1,30 @@
 require 'pry'
 CCSS_FILE = './style.ccss'
 
-NEW_SELECTOR_MATCHER = /(\s*\w+\s*)+{/
 
 class Parser
 
+  NEW_SELECTOR_MATCHER = /(\s*\w+\s*)+{/
+
+  SELECTOR_CONTENT_MATCHER = /{.*/m
+
   def parse_file(file)
-    lines = File.readlines file
+    data = File.read file
+    lines = data.split(/(?<=[{}])/)
+            .reject(&:empty?)
+            .map(&:strip)
     lines.each do |line|
-      if line.match NEW_SELECTOR_MATCHER
-        selectors.push Selector.new(line)
+      if line.end_with? '{'
+        selector_chain = line.chop.strip
+        new_selector = Selector.new(selector_chain)
+        if current_chain.empty?
+          base_selectors << new_selector
+        else
+          current_selector.children << new_selector
+        end
+        current_chain << new_selector           
+      elsif line.end_with? '}'
+        current_chain.pop
       end
     end
     Pry.start binding
@@ -27,13 +42,28 @@ class Parser
     @selectors ||= []
   end
 
+  def current_chain
+    @current_chain ||= []
+  end
+
+  def base_selectors
+    @base_selectors ||= []
+  end
+
+  def current_selector
+    @current_chain.last
+  end
+
 end
 
 class Selector
 
   def initialize(selector_chain)
-    selector_words = selector_chain.strip.scan /\S+/
-    @selector_chain = selector_words.first selector_words.index("{")
+    @selector_chain = selector_chain
+  end
+
+  def children
+    @children ||= []
   end
 end
 
