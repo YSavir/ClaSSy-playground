@@ -15,8 +15,11 @@ class Parser
             .map(&:strip)
     lines.each do |line|
       if line.end_with? '{'
-        selector_chain = line.chop.strip
+        content = line.chop.strip
+        broken_down_content = content.split ';'
+        selector_chain = broken_down_content.pop
         new_selector = Selector.new(selector_chain)
+        current_selector.parse broken_down_content if broken_down_content.any?
         if current_chain.empty?
           base_selectors << new_selector
         else
@@ -24,6 +27,9 @@ class Parser
         end
         current_chain << new_selector           
       elsif line.end_with? '}'
+        content = line.chop.strip
+        content = content.split ';'
+        current_selector.parse content
         current_chain.pop
       end
     end
@@ -59,11 +65,25 @@ end
 class Selector
 
   def initialize(selector_chain)
-    @selector_chain = selector_chain
+    @selector_chain = selector_chain.strip
   end
 
   def children
     @children ||= []
+  end
+
+  def parse(attribute_pairs)
+    attribute_pairs.map! do |pair|
+      pair.split(/:/).map(&:strip)
+    end.each do |pair|
+      attributes[pair[0]] = pair[1]
+    end
+  end
+
+  private
+
+  def attributes
+    @attributes ||= {}
   end
 end
 
