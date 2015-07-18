@@ -6,8 +6,13 @@ module Classy
 
       SELECTOR_CONTENT_MATCHER = /{.*/m
 
-      def parse_file(file)
-        @lines = File.read file
+      def initialize(file_name)
+        @file_name = file_name
+      end
+
+      def parse_file
+
+        @lines = File.read "#{@file_name}.ccss"
         break_up_lines
         @lines.map! { |line| Classy::Parser::Line.new line }
 
@@ -27,6 +32,14 @@ module Classy
             current_chain.pop
           end
         end
+      end
+
+      def output_to_file
+        text_array = base_selectors.map { |selector| selector.to_s }
+
+        file = File.open "#{@file_name}.css", 'w'
+        file.write text_array.join("\n\n")
+        file.close
       end
 
       private
@@ -54,6 +67,7 @@ module Classy
       def current_selector
         @current_chain.last
       end
+
     end
   end
 end

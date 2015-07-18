@@ -1,0 +1,12 @@
+html {
+  margin: 0;
+}
+
+body {
+  width: 100px;
+  height: 50px;
+
+  div .class {
+    border: 5px solid black;
+  }
+}

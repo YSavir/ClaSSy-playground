@@ -6,9 +6,10 @@ require_relative 'classy/selector'
 require_relative 'classy/parsers/sheet'
 require_relative 'classy/parsers/line'
 
-CCSS_FILE = File.expand_path 'style.ccss'
+CCSS_FILE = File.expand_path 'style'
 
-parser = Classy::Parser::Sheet.new
+parser = Classy::Parser::Sheet.new CCSS_FILE
 
-parser.parse_file CCSS_FILE
+parser.parse_file
+parser.output_to_file
 
