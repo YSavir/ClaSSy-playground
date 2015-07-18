@@ -15,15 +15,18 @@ module Classy
     end
 
     def parse(line_contents)
-      line_contents.map! do |pair|
-        parse_content(pair)
-      end.each do |pair|
-        attributes[pair[0]] = pair[1]
+      line_contents.map! do |declaration|
+        parse_content(declaration)
+      end.each do |dec|
+        declarations.merge! dec
       end
     end
 
     def parse_content(content)
-      content.split(/:/).map(&:strip)
+      property, value = content.split /:/
+      {
+        property.strip => value.strip,
+      }
     end
 
     def add_child(selector)
@@ -38,12 +41,11 @@ module Classy
 
     def to_s
       string_array = ["#{selector_chain} {".prepend(" " * selector_indent_level)]
-      attributes.each do |pair|
-        string_array << "#{pair[0]}: #{pair[1]};".prepend(" " * content_indent_level)
+      declarations.each do |property, value|
+        string_array << "#{property}: #{value};".prepend(" " * content_indent_level)
       end
       children.each do |child|
-        string_array << ""
-        string_array << child.to_s
+        string_array.push "", child.to_s
       end
       string_array << "}".prepend(" " * selector_indent_level)
       string_array.join("\n")
@@ -67,8 +69,8 @@ module Classy
       @content_indent_level ||= selector_indent_level + 2
     end
 
-    def attributes
-      @attributes ||= {}
+    def declarations
+      @declaration ||= {}
     end
   end
 end
