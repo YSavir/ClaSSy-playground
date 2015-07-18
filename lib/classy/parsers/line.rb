@@ -25,8 +25,22 @@ module Classy
 
       def parse
         content = @line.chop.strip.split ';'
+        if ends_block?
+          parse_without_selector content
+        else
+          parse_with_selector content
+        end
+      end
+
+      def parse_with_selector(content)
         @parsed_line = {
           :selector_chain => content.pop,
+          :content => content
+        }
+      end
+
+      def parse_without_selector(content)
+        @parsed_line = {
           :content => content
         }
       end

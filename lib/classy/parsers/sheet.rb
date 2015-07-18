@@ -27,7 +27,6 @@ module Classy
             current_chain.pop
           end
         end
-        Pry.start binding
       end
 
       private

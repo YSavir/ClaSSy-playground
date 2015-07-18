@@ -1,5 +1,6 @@
 module Classy
   class Selector
+    attr_reader :parent, :selector_chain
 
     def initialize(selector_chain)
       @selector_chain = selector_chain.strip
@@ -15,7 +16,7 @@ module Classy
 
     def parse(line_contents)
       line_contents.map! do |pair|
-        pair.split(/:/).map(&:strip)
+        parse_content(pair)
       end.each do |pair|
         attributes[pair[0]] = pair[1]
       end
@@ -27,9 +28,44 @@ module Classy
 
     def add_child(selector)
       children << selector
+      selector.parent = self
     end
 
+    def ancestors
+      return [] unless @parent
+      @ancestors ||= [parent] + parent.ancestors
+    end
+
+    def to_s
+      string_array = ["#{selector_chain} {".prepend(" " * selector_indent_level)]
+      attributes.each do |pair|
+        string_array << "#{pair[0]}: #{pair[1]};".prepend(" " * content_indent_level)
+      end
+      children.each do |child|
+        string_array << ""
+        string_array << child.to_s
+      end
+      string_array << "}".prepend(" " * selector_indent_level)
+      string_array.join("\n")
+    end
+
+    protected
+
+    attr_writer :parent
+
     private
+
+    def depth
+      ancestors.length
+    end
+
+    def selector_indent_level
+      @selector_intend_level ||= depth * 2
+    end
+
+    def content_indent_level
+      @content_indent_level ||= selector_indent_level + 2
+    end
 
     def attributes
       @attributes ||= {}
