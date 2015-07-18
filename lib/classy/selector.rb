@@ -21,8 +21,8 @@ module Classy
       end
     end
 
-    def clean(content)
-      content.chop.strip
+    def parse_content(content)
+      content.split(/:/).map(&:strip)
     end
 
     def add_child(selector)
