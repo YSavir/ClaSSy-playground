@@ -16,7 +16,7 @@ module Classy
       end
 
       def selector_chain
-        @selector_chian ||= @parsed_line[:selector_chain]
+        @selector_chain ||= @parsed_line[:selector_chain]
       end
 
       def content

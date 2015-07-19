@@ -25,10 +25,8 @@ module Classy
     end
 
     def parse_content(content)
-      property, value = content.split /:/
-      {
-        property.strip => value.strip,
-      }
+      property, value = content.split(/:/).map(&:strip)
+      { property => value }
     end
 
     def add_child(selector)
