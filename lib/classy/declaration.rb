@@ -33,7 +33,7 @@ module Classy
     end
 
     def depth
-      selector.depth + 1
+      @depth ||= selector.depth + 1
     end
   end
 end
