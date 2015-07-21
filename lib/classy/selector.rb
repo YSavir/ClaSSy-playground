@@ -16,17 +16,14 @@ module Classy
     end
 
     def parse
-      @declarations.map do |declaration|
-        parse_content(declaration)
-      end.each do |dec|
-        add_prop dec.keys.first
-        properties_and_values.merge! dec
+      @declarations.map! do |raw_declaration|
+        parse_declaration(raw_declaration)
       end
     end
 
-    def parse_content(content)
-      property, value = content.split(/:/).map(&:strip)
-      { property => value }
+    def parse_declaration(content)
+      property, value = content.split(/(?<=[:])/).map(&:strip)
+      Declaration.new self, property, value
     end
 
     def add_child(selector)
@@ -40,15 +37,19 @@ module Classy
     end
 
     def to_s
-      string_array = ["#{selector_chain} {".prepend(" " * selector_indent_level)]
-      properties_and_values.each do |property, value|
-        string_array << "#{property}: #{value};".prepend(" " * content_indent_level)
+      string_array = [Classy::Formatter.indent(selector_chain, depth)]
+      @declarations.each do |dec|
+        string_array << dec.formatted
       end
       children.each do |child|
         string_array.push "", child.to_s
       end
-      string_array << "}".prepend(" " * selector_indent_level)
+      string_array << Classy::Formatter.indent("}", depth)
       string_array.join("\n")
+    end
+
+    def depth
+      ancestors.length
     end
 
     protected
@@ -63,16 +64,8 @@ module Classy
       instance_variable_set "@#{property_name.camelize}", prop_object
     end
 
-    def depth
-      ancestors.length
-    end
-
-    def selector_indent_level
-      @selector_intend_level ||= depth * 2
-    end
-
     def content_indent_level
-      @content_indent_level ||= selector_indent_level + 2
+      @content_indent_level ||= depth + 1
     end
 
     def properties_and_values

@@ -2,7 +2,9 @@ require 'pry'
 
 module Classy; end
 
+require_relative 'classy/formatter'
 require_relative 'classy/selector'
+require_relative 'classy/declaration'
 require_relative 'classy/parsers/sheet'
 require_relative 'classy/parsers/line'
 require_relative 'classy/property'

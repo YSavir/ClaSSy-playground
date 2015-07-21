@@ -1,12 +1,10 @@
-html {
-  width: 500px;
+html
+  width: 500px
 }
 
-body {
-  width: 100px;
-  height: 50px;
+body
 
-  div .class {
-    background-color: blue;
+  div .class
+    background-color: blue
   }
 }
