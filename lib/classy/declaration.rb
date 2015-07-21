@@ -15,9 +15,9 @@ module Classy
     def to_s
       case @operator
       when "="
-        "#{@property}: #{@value}"
+        "#{@property}: #{@value};"
       else
-        [@property, @operator, @value].join(' ')
+        [@property, @operator, @value].join(' ') + ';'
       end
     end
 

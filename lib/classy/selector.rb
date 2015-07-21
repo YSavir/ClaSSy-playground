@@ -4,20 +4,16 @@ module Classy
 
     def initialize(selector_chain)
       @selector_chain = selector_chain.strip
+      @declarations = []
     end
 
     def children
       @children ||= []
     end
 
-    def add_content(declarations)
-      @declarations = declarations
-      parse unless declarations.empty?
-    end
-
-    def parse
-      @declarations.map! do |raw_declaration|
-        parse_declaration(raw_declaration)
+    def add_content(new_declarations)
+      new_declarations.each do |dec|
+        @declarations << parse_declaration(dec)
       end
     end
 
