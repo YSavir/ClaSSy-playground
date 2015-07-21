@@ -17,7 +17,7 @@ module Classy
       when "="
         "#{@property}: #{@value};"
       else
-        [@property, @operator, @value].join(' ') + ';'
+        "#{@property} #{@operator} #{@value};"
       end
     end
 
