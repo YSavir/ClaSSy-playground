@@ -35,7 +35,7 @@ module Classy
       end
 
       def output_to_file
-        text_array = base_selectors.map { |selector| selector.to_s }
+        text_array = base_selectors.map { |selector| selector.to_css }
 
         file = File.open "#{@file_name}.css", 'w'
         file.write text_array.join("\n\n")

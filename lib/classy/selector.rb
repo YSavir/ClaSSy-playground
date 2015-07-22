@@ -12,14 +12,13 @@ module Classy
     end
 
     def add_content(new_declarations)
-      new_declarations.each do |dec|
-        @declarations << parse_declaration(dec)
+      new_declarations.each do |declaration|
+        parse_and_add declaration
       end
     end
 
     def parse_declaration(content)
-      property, value = content.split(/(?<=[:])/).map(&:strip)
-      Declaration.new self, property, value
+      Declaration.from_unparsed_declaration(self, content)
     end
 
     def add_child(selector)
@@ -32,13 +31,15 @@ module Classy
       @ancestors ||= [parent] + parent.ancestors
     end
 
-    def to_s
+    def to_css
+      run_declarations
       string_array = [Classy::Formatter.indent(selector_chain, depth)]
-      @declarations.each do |dec|
-        string_array << dec.formatted
+      properties.each do |prop|
+        value = instance_variable_get "@#{prop.name}"
+        string_array << Declaration.new(self, prop.name, ':', value).formatted
       end
       children.each do |child|
-        string_array.push "", child.to_s
+        string_array.push "", child.to_css
       end
       string_array << Classy::Formatter.indent("}", depth)
       string_array.join("\n")
@@ -54,10 +55,31 @@ module Classy
 
     private
 
-    def add_prop(property)
-      property_name = property.split('-').map(&:capitalize).join
-      prop_object = constantize("Classy::Property::#{property_name}").new(self)
-      instance_variable_set "@#{property_name.camelize}", prop_object
+    def run_declarations
+      @declarations.each do |declaration|
+        puts declaration.to_stringified_block
+        instance_eval declaration.to_stringified_block
+      end
+      Pry.start binding
+    end
+
+    def add_prop(property_name)
+      prop = Property.new_of_type(property_name, self)
+      inst_var_name = "@#{prop.name.underscore}"
+      unless instance_variable_defined? inst_var_name
+        properties << prop
+        set_instance_var inst_var_name, prop.value
+      end
+    end
+
+    def parse_and_add declaration
+      parsed_dec = parse_declaration declaration
+      @declarations << parsed_dec
+      add_prop parsed_dec.property
+    end
+
+    def properties
+      @properties ||= []
     end
 
     def content_indent_level
@@ -66,6 +88,10 @@ module Classy
 
     def properties_and_values
       @properties_and_values ||= {}
+    end
+    
+    def set_instance_var(var_name, value)
+      instance_variable_set var_name, value
     end
   end
 end

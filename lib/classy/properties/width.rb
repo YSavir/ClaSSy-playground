@@ -1,9 +1,9 @@
 module Classy
   module Property
     class Width < Base
+      @@default = 'auto'
 
       def initialize(selector)
-        @value = 'auto' 
         super
       end
 

@@ -1,34 +1,43 @@
 module Classy
   class Declaration
-    attr_reader :selector
+    attr_reader :selector, :property
 
-    def initialize(selector, raw_property, value)
+    def initialize(selector, property, operator, value)
+      @property = property
       @selector = selector
+      @operator = operator
       @value = value
-      parse_raw_property(raw_property)
     end
 
     def formatted
-      Classy::Formatter.indent to_s, depth
+      Classy::Formatter.indent to_css, depth
     end
 
-    def to_s
-      case @operator
-      when "="
-        "#{@property}: #{@value};"
-      else
-        "#{@property} #{@operator} #{@value};"
-      end
+    def to_css
+      "#{@property.dasherize}: #{@value};"
+    end
+
+    def to_stringified_block
+      "@#{@property.underscore} #{@operator} \"#{@value}\""
     end
 
     private
 
-    def parse_raw_property(raw_property)
+    def self.from_unparsed_declaration(selector, unparsed_declaration)
+      raw_property, value = unparsed_declaration.split(/(?<=[:])/).map(&:strip)
+      property, operator = parse_property_and_operator(raw_property)
+      new(selector, property, operator, value)
+    end
+
+    def self.from_property(selector, property)
+      new(selector, property.name, '=', property.value) 
+    end
+
+    def self.parse_property_and_operator(raw_property)
       if raw_property.end_with? ':'
-        @property = raw_property.chop
-        @operator = "="
+        return raw_property.chop, '='
       else
-        @property, @operator = raw_property.split(' ').map(&:strip)
+        return raw_property.split(' ').map(&:strip)
       end
     end
 
